@@ -8,23 +8,22 @@
 import SwiftUI
 
 struct Home: View {
-
     /// Task Manager Properties
     @State private var currentDate: Date = .init()
     @State private var weekSlider: [[Date.WeekDay]] = []
     @State private var currentWeekIndex: Int = 1
     @State private var createWeek: Bool = false
-
     @State private var tasks: [Task] = sampleTasks.sorted(by: { $1.creationDate > $0.creationDate })
-
     @State private var createNewTask: Bool = false
     /// Animation Namespace
     @Namespace private var animation
     var body: some View {
         VStack(alignment: .leading, spacing: 0, content: {
             HeaderView()
-            ScrollView (.vertical){
-                VStack{
+
+            ScrollView(.vertical) {
+                VStack {
+                    /// Tasks View
                     TasksView()
                 }
                 .hSpacing(.center)
@@ -81,11 +80,13 @@ struct Home: View {
                     .foregroundStyle(.gray)
             }
             .font(.title.bold())
+
             Text(currentDate.formatted(date: .complete, time: .omitted))
                 .font(.callout)
                 .fontWeight(.semibold)
                 .textScale(.secondary)
                 .foregroundStyle(.gray)
+
             /// Week Slider
             TabView(selection: $currentWeekIndex) {
                 ForEach(weekSlider.indices, id: \.self) { index in
@@ -99,7 +100,7 @@ struct Home: View {
             .tabViewStyle(.page(indexDisplayMode: .never))
             .frame(height: 90)
         }
-        .hSpacing(.leading) // wyrównanie do lewej
+        .hSpacing(.leading)
         .overlay(alignment: .topTrailing, content: {
             Button(action: {}, label: {
                 Image(.picture)
@@ -110,7 +111,6 @@ struct Home: View {
             })
         })
         .padding(15)
-
         .background(.white)
         .onChange(of: currentWeekIndex, initial: false) { oldValue, newValue in
             /// Creating When it reaches first/last Page
@@ -134,16 +134,17 @@ struct Home: View {
 
                     Text(day.date.format("dd"))
                         .font(.callout)
-                        .fontWeight(.medium)
+                        .fontWeight(.bold)
                         .textScale(.secondary)
                         .foregroundStyle(isSameDate(day.date, currentDate) ? .white : .gray)
-                        .frame(width: 35,height: 35)
+                        .frame(width: 35, height: 35)
                         .background(content: {
-                            if isSameDate(day.date, currentDate){
+                            if isSameDate(day.date, currentDate) {
                                 Circle()
                                     .fill(.darkBlue)
                                     .matchedGeometryEffect(id: "TABINDICATOR", in: animation)
                             }
+
                             /// Indicator to Show, Which is Today;s Date
                             if day.date.isToday {
                                 Circle()
@@ -153,7 +154,7 @@ struct Home: View {
                                     .offset(y: 12)
                             }
                         })
-                        .background(.white.shadow(.drop(radius: 1)),in: .circle)
+                        .background(.white.shadow(.drop(radius: 1)), in: .circle)
                 }
                 .hSpacing(.center)
                 .contentShape(.rect)
