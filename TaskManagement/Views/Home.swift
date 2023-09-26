@@ -20,6 +20,14 @@ struct Home: View {
             HeaderView()
         })
         .vSpacing(.top)
+        .onAppear(perform: {
+            if weekSlider.isEmpty {
+                let currentWeek = Date().fetchWeek()
+
+                weekSlider.append(currentWeek)
+
+            }
+        })
     }
 
     /// Header View
@@ -39,6 +47,18 @@ struct Home: View {
                 .fontWeight(.semibold)
                 .textScale(.secondary)
                 .foregroundStyle(.gray)
+            /// Week Slider
+            TabView(selection: $currentWeekIndex) {
+                ForEach(weekSlider.indices, id: \.self) { index in
+                    let week = weekSlider[index]
+                    WeekView(week)
+                        .padding(.horizontal, 15)
+                        .tag(index)
+                }
+            }
+            .padding(.horizontal, -15)
+            .tabViewStyle(.page(indexDisplayMode: .never))
+            .frame(height: 90)
         }
         .hSpacing(.leading) // wyrównanie do lewej
         .overlay(alignment: .topTrailing, content: {
@@ -59,7 +79,16 @@ struct Home: View {
     @ViewBuilder
     func WeekView(_ week: [Date.WeekDay]) -> some View {
         HStack(spacing: 0) {
-            Text("")
+            ForEach(week) { day in
+                VStack(spacing: 8) {
+                    Text(day.date.format("E"))
+                        .font(.callout)
+                        .fontWeight(.medium)
+                        .textScale(.secondary)
+                        .foregroundStyle(.gray)
+                }
+                .hSpacing(.center)
+            }
         }
     }
 
