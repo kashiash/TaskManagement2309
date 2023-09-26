@@ -720,12 +720,6 @@ definiujemy subWidok  `TasksView`:
             ForEach($tasks) { $task in
                 TaskRowView(task: $task)
                     .background(alignment: .leading) {
-                        if tasks.last?.id != task.id {
-                            Rectangle()
-                                .frame(width: 1)
-                                .offset(x: 8)
-                                .padding(.bottom, -35)
-                        }
                     }
             }
         }
@@ -736,20 +730,7 @@ definiujemy subWidok  `TasksView`:
 
 
 
-gdzie kod:
 
-```swift
-                    .background(alignment: .leading) {
-                        if tasks.last?.id != task.id {
-                            Rectangle()
-                                .frame(width: 1)
-                                .offset(x: 8)
-                                .padding(.bottom, -35)
-                        }
-                    }
-```
-
-daje nam pionową linie pomiedzy wierszamiz zadań 
 
 Widać, że brakuje nam `TaskRowView`, wiec dodajemy nowy  plik SwiftUI
 
@@ -777,6 +758,19 @@ struct TaskRowView: View {
 ```
 
 
+
+w Home za wywolaniem TaskRowView dodajmy łacznik pomiedzy zadaniami:
+
+```swift
+                    .background(alignment: .leading) {
+                        if tasks.last?.id != task.id {
+                            Rectangle()
+                                .frame(width: 1)
+                                .offset(x: 8)
+                                .padding(.bottom, -35)
+                        }
+                    }
+```
 
 co powinno dac nam widok mniej wiecej taki:
 
@@ -907,6 +901,161 @@ struct TaskRowView: View {
 #Preview {
     ContentView()
 }
+
+```
+
+### NewTaskView - dopisywanie nowych zadań
+
+
+
+Dopisywanie zrobimy na dodatkowym arkuszu, ktory bedzie sterowany zmieni createNewTask:
+
+w nagłówku widoku dodajemy kolejną zmienną
+
+`@State private var createNewTask: Bool = false`
+
+
+
+w prawym dolnym rogu ddoamy przycisk dodawania, ktory bedzie ustawiał tą zmienną co w konsekwencji pokaże nasz arkusz do edycji danych:
+
+```swift
+        .overlay(alignment: .topTrailing, content: {
+            Button(action: {}, label: {
+                Image(.pic)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 45, height: 45)
+                    .clipShape(.circle)
+            })
+        })
+```
+
+
+
+i sama obsluga arkusza:
+
+```swift
+        .sheet(isPresented: $createNewTask, content: {
+            NewTaskView()
+                .presentationDetents([.height(300)])
+                .interactiveDismissDisabled()
+                .presentationCornerRadius(30)
+                .presentationBackground(.BG)
+        })
+```
+
+
+
+i dodajemy `NewTaskView`
+
+```swift
+struct NewTaskView: View {
+    /// View Properties
+    @Environment(\.dismiss) private var dismiss
+    @State private var taskTitle: String = ""
+    @State private var taskDate: Date = .init()
+    @State private var taskColor: Color = .taskColor1
+    var body: some View {
+        VStack(alignment: .leading, spacing: 15, content: {
+            Button(action: {
+                dismiss()
+            }, label: {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.title)
+                    .tint(.red)
+            })
+            .hSpacing(.leading)
+            
+            VStack(alignment: .leading, spacing: 8, content: {
+                Text("Task Title")
+                    .font(.caption)
+                    .foregroundStyle(.gray)
+                
+                TextField("Go for a Walk!", text: $taskTitle)
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 15)
+                    .background(.white.shadow(.drop(color: .black.opacity(0.25), radius: 2)), in: .rect(cornerRadius: 10))
+            })
+            .padding(.top, 5)
+            
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 8, content: {
+                    Text("Task Date")
+                        .font(.caption)
+                        .foregroundStyle(.gray)
+                    
+                    DatePicker("", selection: $taskDate)
+                        .datePickerStyle(.compact)
+                        .scaleEffect(0.9, anchor: .leading)
+                })
+                /// Giving Some Space for tapping
+                .padding(.trailing, -15)
+                
+                VStack(alignment: .leading, spacing: 8, content: {
+                    Text("Task Color")
+                        .font(.caption)
+                        .foregroundStyle(.gray)
+                    
+                    let colors: [Color] = [.taskColor1, .taskColor2, .taskColor3, .taskColor4, .taskColor5]
+                    
+                    HStack(spacing: 0) {
+                        ForEach(colors, id: \.self) { color in
+                            Circle()
+                                .fill(color)
+                                .frame(width: 20, height: 20)
+                                .background(content: {
+                                    Circle()
+                                        .stroke(lineWidth: 2)
+                                        .opacity(taskColor == color ? 1 : 0)
+                                })
+                                .hSpacing(.center)
+                                .contentShape(.rect)
+                                .onTapGesture {
+                                    withAnimation(.snappy) {
+                                        taskColor = color
+                                    }
+                                }
+                        }
+                    }
+                })
+                
+            }
+            .padding(.top, 5)
+            
+            Spacer(minLength: 0)
+            
+            Button(action: {}, label: {
+                Text("Create Task")
+                    .font(.title3)
+                    .fontWeight(.semibold)
+                    .textScale(.secondary)
+                    .foregroundStyle(.black)
+                    .hSpacing(.center)
+                    .padding(.vertical, 12)
+                    .background(taskColor, in: .rect(cornerRadius: 10))
+            })
+            .disabled(taskTitle == "")
+            .opacity(taskTitle == "" ? 0.5 : 1)
+        })
+        .padding(15)
+    }
+}
+
+#Preview {
+    NewTaskView()
+        .vSpacing(.bottom)
+}
+```
+
+
+
+
+
+
+
+ponizej kompletny kod widoku Home:
+
+```swift
 
 ```
 
