@@ -20,12 +20,16 @@ struct Task: Identifiable {
 }
 
 var sampleTasks: [Task] = [
-    .init(taskTitle: "Record Video", creationDate: .updateHour(-1), isCompleted: true, tint: .taskColor1),
-    .init(taskTitle: "Redesign Website", creationDate: .updateHour(9), tint: .taskColor2),
-    .init(taskTitle: "Go for a Walk", creationDate: .updateHour(10), tint: .taskColor3),
-    .init(taskTitle: "Edit Video", creationDate: .updateHour(0), tint: .taskColor4),
-    .init(taskTitle: "Publish Video", creationDate: .updateHour(2), tint: .taskColor1),
-    .init(taskTitle: "Tweet about new Video!", creationDate: .updateHour(12), tint: .taskColor5),
+   .init(taskTitle: "Przygotuj samochód do wynajmu", creationDate: .updateHour(9), tint: .taskColor1),
+    .init(taskTitle: "Umów klienta na odbiór samochodu", creationDate: .updateHour(10), tint: .taskColor2),
+    .init(taskTitle: "Przygotuj samochód na pojazd zimowy", creationDate: .updateHour(11), tint: .taskColor3),
+    .init(taskTitle: "Dokumentacja dla klienta", creationDate: .updateHour(12), tint: .taskColor4),
+    .init(taskTitle: "Przygotuj kontrakt wynajmu", creationDate: .updateHour(13), tint: .taskColor1),
+    .init(taskTitle: "Odbierz zwrot samochodu", creationDate: .updateHour(14), tint: .taskColor2),
+    .init(taskTitle: "Zamów części zamiennych", creationDate: .updateHour(15), tint: .taskColor3),
+    .init(taskTitle: "Przeszkolenie pracowników", creationDate: .updateHour(16), tint: .taskColor4),
+    .init(taskTitle: "Sprawdź stan techniczny pojazdów", creationDate: .updateHour(17), tint: .taskColor1),
+    .init(taskTitle: "Zatankuj samochody", creationDate: .updateHour(18), tint: .taskColor2)
 ]
 ```
 
@@ -673,4 +677,236 @@ Kompletny widok WeekView
 
 
 ### TaskView
+
+
+
+
+
+Dodajemy ScrollView w głównym widoku 
+
+```swift
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0, content: {
+            HeaderView()
+            ScrollView (.vertical) {
+                VStack {
+                    TasksView()
+                }
+                .hSpacing(.center)
+                .vSpacing(.center)
+            }
+            .scrollIndicators(.hidden)
+          ...
+        }   
+```
+
+
+
+dodajemy kolekcję do przechowywania zadań (w dalszej części dodamy do niej obsługę danych z SwiftData):
+
+```swift
+@State private var tasks: [Task] = sampleTasks.sorted(by: { $1.creationDate > $0.creationDate })
+```
+
+ 
+
+definiujemy subWidok  `TasksView`:
+
+```swift
+    /// Tasks View
+    @ViewBuilder
+    func TasksView() -> some View {
+        VStack(alignment: .leading, spacing: 35) {
+            ForEach($tasks) { $task in
+                TaskRowView(task: $task)
+                    .background(alignment: .leading) {
+                        if tasks.last?.id != task.id {
+                            Rectangle()
+                                .frame(width: 1)
+                                .offset(x: 8)
+                                .padding(.bottom, -35)
+                        }
+                    }
+            }
+        }
+        .padding([.vertical, .leading], 15)
+        .padding(.top, 15)
+    }
+```
+
+
+
+gdzie kod:
+
+```swift
+                    .background(alignment: .leading) {
+                        if tasks.last?.id != task.id {
+                            Rectangle()
+                                .frame(width: 1)
+                                .offset(x: 8)
+                                .padding(.bottom, -35)
+                        }
+                    }
+```
+
+daje nam pionową linie pomiedzy wierszamiz zadań 
+
+Widać, że brakuje nam `TaskRowView`, wiec dodajemy nowy  plik SwiftUI
+
+```swift
+struct TaskRowView: View {
+  @Binding var task: Task
+  var body: some View {
+    HStack(alignment: .top, spacing: 15) {
+      Circle()
+      .frame(width: 10, height: 10)
+      .padding(4)
+
+      VStack(alignment: .leading, spacing: 8, content: {
+        Text(task.taskTitle)
+        .fontWeight(.semibold)
+        .foregroundStyle(.black)
+
+        Label(task.creationDate.format("hh:mm a"), systemImage: "clock")
+        .font(.caption)
+        .foregroundStyle(.black)
+      })
+    }
+  }
+}
+```
+
+
+
+co powinno dac nam widok mniej wiecej taki:
+
+
+
+![image-20230926181815953](image-20230926181815953.png)
+
+Na kropkach chcemy pokazywac czy zadanie jest przeterminowane, zamkniete itp, wiec pod circle() dodajemy kolorowanie 
+
+`.fill(indicatorColor)`
+
+a kolor dostaniemy z funkcji:
+
+```swift
+    var indicatorColor: Color {
+        if task.isCompleted {
+            return .green
+        }
+
+        return task.creationDate.isSameHour ? .darkBlue : (task.creationDate.isPast ? .red : .black)
+    }
+```
+
+
+
+ktora wymaga aby naszego Data+Helper wzbogacic o 2 nowe funkcje:
+
+```swift
+    /// Checking if the date is Same Hour
+    var isSameHour: Bool {
+        return Calendar.current.compare(self, to: .init(), toGranularity: .hour) == .orderedSame
+    }
+    
+    /// Checking if the date is Past Hours
+    var isPast: Bool {
+        return Calendar.current.compare(self, to: .init(), toGranularity: .hour) == .orderedAscending
+    }
+```
+
+
+
+kazde z zadań wyrównujemy dodajemy troche odstępu,  do lewej, ustawiamy kolor przypisany do zadania oraz dla zadan ukoczonych ustawiamy font przekreślony, przesuwamy w pionie nieco w górę:
+
+```swift
+            .padding(15)
+            .hSpacing(.leading)
+            .background(task.tint, in: .rect(topLeadingRadius: 15, bottomLeadingRadius: 15))
+            .strikethrough(task.isCompleted, pattern: .solid, color: .black)
+            .offset(y: -8)
+```
+
+i juz nasza aplikacja zaczyna coś pokazywać:
+
+![image-20230926182813679](image-20230926182813679.png) 
+
+
+
+
+
+Klikajac na kólko z lewej chcielibyśmy oznaczyc zadanie jako zakończone (lub odznaczyć)
+
+```swift
+.overlay {
+  Circle()
+  .frame(width: 50, height: 50)
+  .blendMode(.destinationOver)
+  .onTapGesture {
+    withAnimation(.snappy) {
+      task.isCompleted.toggle()
+    }
+  }
+}
+```
+
+
+
+
+
+Kompletny kod TaskRowView:
+
+```swift
+struct TaskRowView: View {
+    @Binding var task: Task
+    var body: some View {
+        HStack(alignment: .top, spacing: 15) {
+            Circle()
+                .fill(indicatorColor)
+                .frame(width: 10, height: 10)
+                .padding(4)
+                .background(.white.shadow(.drop(color: .black.opacity(0.1), radius: 3)), in: .circle)
+                .overlay {
+                    Circle()
+                        .frame(width: 50, height: 50)
+                        .blendMode(.destinationOver)
+                        .onTapGesture {
+                            withAnimation(.snappy) {
+                                task.isCompleted.toggle()
+                            }
+                        }
+                }
+            
+            VStack(alignment: .leading, spacing: 8, content: {
+                Text(task.taskTitle)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.black)
+                
+                Label(task.creationDate.format("hh:mm a"), systemImage: "clock")
+                    .font(.caption)
+                    .foregroundStyle(.black)
+            })
+            .padding(15)
+            .hSpacing(.leading)
+            .background(task.tint, in: .rect(topLeadingRadius: 15, bottomLeadingRadius: 15))
+            .strikethrough(task.isCompleted, pattern: .solid, color: .black)
+            .offset(y: -8)
+        }
+    }
+    
+    var indicatorColor: Color {
+        if task.isCompleted {
+            return .green
+        }
+        
+        return task.creationDate.isSameHour ? .darkBlue : (task.creationDate.isPast ? .red : .black)
+    }
+}
+
+#Preview {
+    ContentView()
+}
+
+```
 

@@ -16,12 +16,12 @@ struct Task: Identifiable {
 }
 
 var sampleTasks: [Task] = [
-    .init(taskTitle: "Record Video", creationDate: .updateHour(-1), isCompleted: true, tint: .taskColor1),
-    .init(taskTitle: "Redesign Website", creationDate: .updateHour(9), tint: .taskColor2),
-    .init(taskTitle: "Go for a Walk", creationDate: .updateHour(10), tint: .taskColor3),
-    .init(taskTitle: "Edit Video", creationDate: .updateHour(0), tint: .taskColor4),
-    .init(taskTitle: "Publish Video", creationDate: .updateHour(2), tint: .taskColor1),
-    .init(taskTitle: "Tweet about new Video!", creationDate: .updateHour(12), tint: .taskColor5),
+//    .init(taskTitle: "Record Video", creationDate: .updateHour(-1), isCompleted: true, tint: .taskColor1),
+//    .init(taskTitle: "Redesign Website", creationDate: .updateHour(9), tint: .taskColor2),
+//    .init(taskTitle: "Go for a Walk", creationDate: .updateHour(10), tint: .taskColor3),
+//    .init(taskTitle: "Edit Video", creationDate: .updateHour(0), tint: .taskColor4),
+//    .init(taskTitle: "Publish Video", creationDate: .updateHour(2), tint: .taskColor1),
+//    .init(taskTitle: "Tweet about new Video!", creationDate: .updateHour(12), tint: .taskColor5),
     .init(taskTitle: "Przygotuj samochód do wynajmu", creationDate: .updateHour(9), tint: .taskColor1),
     .init(taskTitle: "Umów klienta na odbiór samochodu", creationDate: .updateHour(10), tint: .taskColor2),
     .init(taskTitle: "Przekształć samochód na pojazd zimowy", creationDate: .updateHour(11), tint: .taskColor3),

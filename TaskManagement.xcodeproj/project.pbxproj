@@ -19,6 +19,7 @@
 		76532B212AC2D03C00236A22 /* Date+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76532B202AC2D03C00236A22 /* Date+Extensions.swift */; };
 		76532B242AC2D4A900236A22 /* Home.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76532B232AC2D4A900236A22 /* Home.swift */; };
 		76532B262AC2FA9E00236A22 /* OffsetKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76532B252AC2FA9E00236A22 /* OffsetKey.swift */; };
+		76532B282AC332E700236A22 /* TaskRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76532B272AC332E700236A22 /* TaskRowView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,6 +56,7 @@
 		76532B202AC2D03C00236A22 /* Date+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Extensions.swift"; sourceTree = "<group>"; };
 		76532B232AC2D4A900236A22 /* Home.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Home.swift; sourceTree = "<group>"; };
 		76532B252AC2FA9E00236A22 /* OffsetKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OffsetKey.swift; sourceTree = "<group>"; };
+		76532B272AC332E700236A22 /* TaskRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskRowView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -164,6 +166,7 @@
 			isa = PBXGroup;
 			children = (
 				76532B232AC2D4A900236A22 /* Home.swift */,
+				76532B272AC332E700236A22 /* TaskRowView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -300,6 +303,7 @@
 			files = (
 				76532AF22AC2C87300236A22 /* ContentView.swift in Sources */,
 				76532B1C2AC2CF5200236A22 /* Task.swift in Sources */,
+				76532B282AC332E700236A22 /* TaskRowView.swift in Sources */,
 				76532B1F2AC2D01B00236A22 /* View+Extensions.swift in Sources */,
 				76532B262AC2FA9E00236A22 /* OffsetKey.swift in Sources */,
 				76532B212AC2D03C00236A22 /* Date+Extensions.swift in Sources */,
