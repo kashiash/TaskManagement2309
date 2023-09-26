@@ -82,7 +82,11 @@ struct NewTaskView: View {
 
             Spacer(minLength: 0)
 
-            Button(action: {}, label: {
+            Button(action: {
+                
+                dismiss()
+
+            }, label: {
                 Text("Create Task")
                     .font(.title3)
                     .fontWeight(.semibold)
