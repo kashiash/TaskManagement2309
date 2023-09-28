@@ -320,7 +320,7 @@ struct Home: View {
 
 
 
-Na koncu Header View po polu Text(currentdate) dodajemy TabView, ktory bedzie wyświetlał dni tygodnia
+Na koncu Header View po polu Text(currentdate...) dodajemy TabView, ktory bedzie wyświetlał dni tygodnia
 
 ```swift
             /// Week Slider
@@ -339,7 +339,7 @@ Na koncu Header View po polu Text(currentdate) dodajemy TabView, ktory bedzie wy
 
 
 
-i zaczynamy budowac Week View
+i zaczynamy budować Week View
 
 ```swift
     /// Week View
@@ -364,7 +364,7 @@ i zaczynamy budowac Week View
 
 ![image-20230926121106282](image-20230926121106282.png)
 
-niżej dodajemy pętle podobną po dniach tygodnia:
+niżej dodajemy w tej samej pętli dni tygodnia:
 
 ```swift
 Text(day.date.format("dd"))
@@ -507,7 +507,7 @@ W Date+Helper dodajemy funkcje generujace tablece dni:
 
 
 
-modyfikujemy kod ladujacy te dni 
+modyfikujemy kod ładujący te dni 
 
 ```swift
         .onAppear(perform: {
@@ -579,7 +579,7 @@ funkcje w widoku Home:
             }
         }
         
-        print(weekSlider.count)
+        print(weekSlider.count)// for debugging reasons
     }
 ```
 
@@ -1279,4 +1279,143 @@ struct Home: View {
 }
 
 ```
+
+
+
+## SwiftData
+
+
+
+Teraz rozbudujemy nasz model o obsluge zapisywania danych w lokalnej bazie urządzenia 
+
+Jest to dosc proste:
+
+importujemy SwiftData, dodajemy atrybyt @model do klasy i dodajemy funcje Init:
+
+```swift
+import SwiftUI
+import SwiftData
+
+@Model
+struct Task: Identifiable {
+
+    var id: UUID
+    var taskTitle: String
+    var creationDate: Date 
+    var isCompleted: Bool = false
+    var tint: Color
+
+    init(id: UUID = .init(), taskTitle: String, creationDate: Date = .init(), isCompleted: Bool = false, tint: Color) {
+        self.id = id
+        self.taskTitle = taskTitle
+        self.creationDate = creationDate
+        self.isCompleted = isCompleted
+        self.tint = tint
+    }
+
+}
+```
+
+
+
+W widoku pozbywamy sie kolekcji zadań, a TasksView przenosimy do osobnego pliku, gdzie dodamy cala obsługę ładowania danych.
+
+```swift
+import SwiftUI
+import SwiftData
+
+struct TasksView: View {
+    @Binding var currentDate: Date
+    @Query private var tasks: [Task]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 35) {
+            ForEach(tasks) { task in
+                TaskRowView(task: task)
+                    .background(alignment: .leading) {
+                        if tasks.last?.id != task.id {
+                            Rectangle()
+                                .frame(width: 1)
+                                .offset(x: 8)
+                                .padding(.bottom, -35)
+                        }
+                    }
+            }
+        }
+        .padding([.vertical, .leading], 15)
+        .padding(.top, 15)
+    }
+
+#Preview {
+    ContentView()
+}
+```
+
+nasz widok bedzie wyświetlał listę zadan z wybranego dnia, dlatego przekazujemy do tego widoku datę wybrana na gornym kalendarzu. 
+
+
+
+W `TaskRowView`  musimy zmodyfikować typa parametru wejsciowego dostarczajacego zadanie do wyświetlenia. Model SwiftData jest zgodny z @Observable, pozwala nam używać @Bindable, co spowoduje, że zmiany na modelu beda automatycznie zapisywane.
+
+```swift
+struct TaskRowView: View {
+    @Bindable var task: Task
+    /// Model Context
+```
+
+
+
+niestety mamy komunikat błędu: `'init(wrappedValue:)' is unavailable: The wrapped value must be an object that conforms to Observable` Wynika to z tego, że w modelu Task mamy pole typu Kolor, ktorego SwiftData nie obsługuje. Dla niektorych typów można użyć atrybutu transformable,  `@Attribute(.transformable) self.tint = tint` niestety musi on implementować interfejs Codable, czego Color nie robi. Zamiast rozbudowywać Color o implementacje Codable, a kolorów mamy tylko kilka, w zmiennej tint użyje typu String. W dalszej rozbudowie tego przykładu być moze przejdziemy na inną reprezentację. 
+
+Dodajemy funkcje konwertujaca string na Color:
+
+```swift
+    var tintColor: Color {
+        switch tint {
+        case "TaskColor 1": return .taskColor1
+        case "TaskColor 2": return .taskColor2
+        case "TaskColor 3": return .taskColor3
+        case "TaskColor 4": return .taskColor4
+        case "TaskColor 5": return .taskColor5
+        default: return .black
+        }
+    }
+```
+
+poprawiamy nazwe zmeinnej z kolorem w TaskRowView
+
+ `.background(task.tintColor, in: .rect(topLeadingRadius: 15, bottomLeadingRadius: 15))`
+
+Wracamy do `TaskView`, gdzie definiujemy predykat do pobrania danych dla naszego widoku. Więcej na temat predykatów:
+
+https://developer.apple.com/documentation/foundation/predicate
+
+https://nshipster.com/nspredicate/
+
+https://nspredicate.xyz
+
+
+
+
+
+```swift
+    init(size: CGSize, currentDate: Binding<Date>) {
+        self._currentDate = currentDate
+        self.size = size
+        /// Predicate
+        let calendar = Calendar.current
+        let startOfDate = calendar.startOfDay(for: currentDate.wrappedValue)
+        let endOfDate = calendar.date(byAdding: .day, value: 1, to: startOfDate)!
+        let predicate = #Predicate<Task> {
+            return $0.creationDate >= startOfDate && $0.creationDate < endOfDate
+        }
+        /// Sorting
+        let sortDescriptor = [
+            SortDescriptor(\Task.creationDate, order: .forward)
+        ]
+        self._tasks = Query(filter: predicate, sort: sortDescriptor, animation: .snappy)
+    }
+```
+
+Predykaty mają swoje ograniczenia. Nie możemy użyć w nim bezpośrednio funkcji, dlatego wyliczamy daty wczesniej i tych zmiennych używamy w definicji predykatu.
 
